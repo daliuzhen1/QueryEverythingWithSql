@@ -1,21 +1,20 @@
 #csv_sql_parser.py
 import pandas as pd
 import apsw
-class PandasSourceInfo:
-    def __init__(self, data_frame):
-            self.data_frame = data_frame
 
-class PandasRegisteTableInfo:
-    def __init__(self, table_name, pandas_source_info):
+class PandasTableSourceInfo:
+    def __init__(self, table_name, data_frame):
         self.table_name = table_name
-        self.pandas_source_info = pandas_source_info
+        self.data_frame = data_frame
 
 class PandasModule:
-    def __init__(self):
+    def __init__(self, module_name):
         self.table_list = {}
+        self.module_name = module_name
 
-    def registeTable(self, pandas_resgiste_table_info):
-        self.table_list[pandas_resgiste_table_info.table_name] = PandasTable(pandas_resgiste_table_info)
+    def createTable(self, cursor, pandas_table_source_info):
+        self.table_list[pandas_table_source_info.table_name] = PandasTable(pandas_table_source_info)
+        cursor.execute("create virtual table "+ pandas_table_source_info.table_name +" using pandas")
 
     def Create(self, db, modulename, dbname, tablename, *args):
         return self.table_list[tablename].declareTable()
@@ -24,19 +23,22 @@ class PandasModule:
 
 
 class PandasTable:
-    def __init__(self, pandas_resgiste_table_info):
-        self.pandas_resgiste_table_info = pandas_resgiste_table_info
-        self.pd_data_frame = self.pandas_resgiste_table_info.pandas_source_info.data_frame
+    def __init__(self, pandas_table_source_info):
+        self.pandas_table_source_info = pandas_table_source_info
+        self.pd_data_frame = self.pandas_table_source_info.data_frame
     
     def declareTable(self):
+        print ("declareTable")
         df = self.pd_data_frame
         schema="create table X("+','.join(["'%s'" % (x,) for x in df.columns.tolist()])+")"
         return schema, self
 
     def BestIndex(self, *args):
+        print ("BestIndex")
         return None
 
     def Open(self):
+        print ("Open")
         return PandasCursor(self)
 
     def Disconnect(self):
