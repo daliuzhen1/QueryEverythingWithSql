@@ -29,11 +29,8 @@ def main():
     connection.createmodule(pandasModel.module_name, pandasModel)
     pandasModel.createTable(cursor, ptsi)
     pandasModel.createTable(cursor, ptsi1)
-    
-    data = cursor.execute("select * from yahoo_prices")
-    for i in data:
-        print (i)
-    data = cursor.execute("select * from yahoo_prices1")
+
+    data = cursor.execute("select * from yahoo_prices a join yahoo_prices1 b on a.AdjClose = b.AdjClose")
     for i in data:
         print (i)
     

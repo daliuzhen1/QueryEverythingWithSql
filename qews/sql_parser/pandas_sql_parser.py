@@ -1,6 +1,7 @@
 #csv_sql_parser.py
 import pandas as pd
 import apsw
+import json
 
 class PandasTableSourceInfo:
     def __init__(self, table_name, data_frame):
@@ -33,9 +34,20 @@ class PandasTable:
         schema="create table X("+','.join(["'%s'" % (x,) for x in df.columns.tolist()])+")"
         return schema, self
 
-    def BestIndex(self, *args):
-        print ("BestIndex")
-        return None
+    def BestIndex(self, constraints, orderbys):
+        
+        if len(constraints) == 0:
+            return None
+        fillter_json_array = []
+        ret_constraint_used  = ()
+        for index in range(len(constraints)):
+            ret_constraint_used = ret_constraint_used + (index,)
+            fillter_json = {"col_index":constraints[index][0], "operation" : constraints[index][1]}
+            fillter_json_array.append(fillter_json)
+        fillter_json_array = json.dumps(fillter_json_array)
+        print (self.pandas_table_source_info.table_name)
+        return ret_constraint_used, 0, fillter_json_array,True,1000
+
 
     def Open(self):
         print ("Open")
@@ -49,8 +61,14 @@ class PandasTable:
 class PandasCursor:
     def __init__(self, table):
         self.table = table
+        self.sort_data_frame = false
 
-    def Filter(self, *args):
+    def Filter(self, indexnum, filter_json, constraintargs):
+        filter_infomation = json.load(filter_json)
+        col_indexs = []
+        for i in range(len(filter_infomation))：
+            col_indexs.append(filter_infomation[i]["col_index"])
+        
         self.pos = 0
 
     def Eof(self):
@@ -60,11 +78,14 @@ class PandasCursor:
         return self.table.data[self.pos][0]
 
     def Column(self, col):
+        # print ("Column")
+        # print (col)
         if self.table.pd_data_frame.dtypes[col] == "object":
            return str(self.table.pd_data_frame.values[self.pos][col])
         return self.table.pd_data_frame.values[self.pos][col]
 
     def Next(self):
+        # print (slf.pos)
         self.pos += 1
         return
 
