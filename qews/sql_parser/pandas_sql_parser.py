@@ -1,58 +1,11 @@
 import pandas as pd
 import apsw
 import json
+from sql_parser.sql_parser import *
 
-class PandasTableSourceInfo:
-    def __init__(self, table_name, data_frame):
-        self.table_name = table_name
-        self.data_frame = data_frame
-
-class PandasModule:
-    def __init__(self, connection):
-        self.table_list = {}
-        self.module_name = "pandas"
-        connection.createmodule(self.module_name, self)
-
-    def createTable(self, cursor, pandas_table_source_info):
-        self.table_list[pandas_table_source_info.table_name] = PandasTable(pandas_table_source_info)
-        cursor.execute("create virtual table "+ pandas_table_source_info.table_name +" using " + self.module_name)
-
-    def Create(self, db, modulename, dbname, tablename, *args):
-        return self.table_list[tablename].declareTable()
-
-    Connect = Create
-
-
-class PandasTable:
-    def __init__(self, pandas_table_source_info):
-        self.pandas_table_source_info = pandas_table_source_info
-        self.pd_data_frame = self.pandas_table_source_info.data_frame
-    
-    def declareTable(self):
-        df = self.pd_data_frame
-        schema="create table X("+','.join(["'%s'" % (x,) for x in df.columns.tolist()])+")"
-        return schema, self
-
-    def BestIndex(self, constraints, orderbys):
-        if len(constraints) == 0:
-            return None
-        fillter_json_array = []
-        ret_constraint_used  = ()
-        for index in range(len(constraints)):
-            ret_constraint_used = ret_constraint_used + (index,)
-            fillter_json = {"col_index":constraints[index][0], "operation" : constraints[index][1]}
-            fillter_json_array.append(fillter_json)
-        fillter_json_array = json.dumps(fillter_json_array)
-        return ret_constraint_used, 0, fillter_json_array,False,1000
-
-
-    def Open(self):
-        return PandasCursor(self)
-
-    def Disconnect(self):
-        pass
-
-    Destroy=Disconnect
+class PandasSourceInfo(SQLParserSourceInfo):
+    def __init__(self, pandas_data_frame):
+        self.data_frame = pandas_data_frame
 
 class FilterInfo:
     def __init__(self, col_index, operation, value, col_name, col_type):
@@ -74,14 +27,39 @@ class FilterInfo:
             operation_str = '<'
         return (self.col_name, operation_str, self.value)
 
+class PandasTable(SQLParserTable):
+    def __init__(self, pandas_source_info):
+        self.pandas_source_info = pandas_source_info
 
-class PandasCursor:
+    def GetColumnNames(self):
+        return self.pandas_source_info.data_frame.columns.tolist()
+
+    def BestIndex(self, constraints, orderbys):
+        if len(constraints) == 0:
+            return None
+        fillter_json_array = []
+        ret_constraint_used  = ()
+        for index in range(len(constraints)):
+            ret_constraint_used = ret_constraint_used + (index,)
+            fillter_json = {"col_index":constraints[index][0], "operation" : constraints[index][1]}
+            fillter_json_array.append(fillter_json)
+        fillter_json_array = json.dumps(fillter_json_array)
+        return ret_constraint_used, 0, fillter_json_array,False,1000
+
+    def Open(self):
+        return PandasCursor(self)
+
+    def Disconnect(self):
+        pass
+
+    Destroy=Disconnect
 
 
+class PandasCursor(SQLParserCursor):
     def __init__(self, table):
         self.table = table
         self.sort_data_frame = False
-        self.pd_data_frame = self.table.pd_data_frame
+        self.pd_data_frame = self.table.pandas_source_info.data_frame
         self.filter_data_frame = self.pd_data_frame
 
     def Filter(self, indexnum, filter_json, constraintargs):
@@ -125,7 +103,7 @@ class PandasCursor:
         return self.pos
 
     def Column(self, col):
-        if self.filter_data_frame.dtypes[col] == "object":
+        if self.filter_data_frame.dtypes[col] == "object" or self.filter_data_frame.dtypes[col] == "datetime64[ns]":
            return str(self.filter_data_frame.values[self.pos][col])
         return self.filter_data_frame.values[self.pos][col]
 

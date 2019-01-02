@@ -1,26 +1,14 @@
 from sql_parser.pandas_sql_parser import *
 import pandas as pd
-from enum import IntEnum
 import apsw
 
-class CsvTableSourceInfo:
-    def __init__(self, table_name, file_path, separator = ','):
-            self.file_path = file_path
-            self.table_name = table_name
-            self.data_frame = pd.read_csv(self.file_path, sep = separator)
+class CsvSourceInfo(SQLParserSourceInfo):
+    def __init__(self, file_path, separator = ','):
+        self.file_path = file_path
+        self.separator = separator
 
-class CsvModule:
-    def __init__(self, connection):
-        self.table_list = {}
-        self.module_name = "csv"
-        connection.createmodule(self.module_name, self)
-
-    def createTable(self, cursor , csv_table_source_info):
-        pandas_table_source_info = PandasTableSourceInfo(csv_table_source_info.table_name, csv_table_source_info.data_frame)
-        self.table_list[csv_table_source_info.table_name] = PandasTable(pandas_table_source_info)
-        cursor.execute("create virtual table "+ csv_table_source_info.table_name +" using " + self.module_name)
-
-    def Create(self, db, modulename, dbname, tablename, *args):
-        return self.table_list[tablename].declareTable()
-
-    Connect = Create
+class CsvTable(PandasTable):
+    def __init__(self, csv_source_info):
+        self.data_frame = pd.read_csv(csv_source_info.file_path, sep = csv_source_info.separator)
+        pd_source_info = PandasSourceInfo(self.data_frame)
+        PandasTable.__init__(self, pd_source_info)
