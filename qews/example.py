@@ -9,7 +9,7 @@ import ibm_db
 import pandas as pd
 
 def main():
-    df = pd.read_csv("C:\\Users\\zhenl\\Documents\\yahoo_prices.csv")
+    df = pd.read_csv("example_data/yahoo_prices.csv")
     connection=apsw.Connection(":memory:")
     sql_parser_module = SQLParserModule(connection, "sql_parser_module")
     pd_source_info = PandasSourceInfo(df)
@@ -18,25 +18,25 @@ def main():
     data = pd.read_sql("select * from yahoo_prices", connection)
     print (data)
 
-    csv_source_info = CsvSourceInfo("C:\\Users\\zhenl\\Documents\\yahoo_prices.csv")
+    csv_source_info = CsvSourceInfo("example_data/yahoo_prices.csv")
     csv_table = CsvTable(csv_source_info, ["Volume"])
     sql_parser_module.registeTable("csv_yahoo_prices", csv_table)
     data = pd.read_sql("select * from csv_yahoo_prices", connection)
     print (data)
 
-    excel_source_info = ExcelSourceInfo("C:\\Users\\zhenl\\Desktop\\Discover_Sales_THINK.xlsx")
+    excel_source_info = ExcelSourceInfo("example_data/Discover_Sales_THINK.xlsx")
     excel_table = ExcelTable(excel_source_info, "Discover_Sales_THINK", ["Country", "ProductName", "Order Date"])
     sql_parser_module.registeTable("Discover_Sales_THINK", excel_table)
     data = pd.read_sql("select * from Discover_Sales_THINK", connection)
     print (data)
 
-    sas_source_info = SasSourceInfo("C:\\Users\\zhenl\\Downloads\\tax.sas7bdat")
+    sas_source_info = SasSourceInfo("example_data/tax.sas7bdat")
     sas_table = SasTable(sas_source_info, ["TAX88", "INC88"])
     sql_parser_module.registeTable("sas", sas_table)
     data = pd.read_sql("select * from sas", connection)
     print (data)
 
-    parquet_source_info = ParquetSourceInfo("C:\\Users\\zhenl\\Downloads\\userdata1.parquet")
+    parquet_source_info = ParquetSourceInfo("example_data/userdata1.parquet")
     parquet_table = ParquetTable(parquet_source_info, ["id"])
     sql_parser_module.registeTable("parquet", parquet_table)
     data = pd.read_sql("select * from parquet", connection)
