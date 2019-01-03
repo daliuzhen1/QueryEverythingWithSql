@@ -3,6 +3,8 @@ Query every thing with sqlite virtual table.Now support csv, excel, parquet, pan
 
 # running example
 cd qews
+# 
 pip install -r requirements.txt
+# 
 example.py
 
