@@ -8,7 +8,7 @@ class CsvSourceInfo(SQLParserSourceInfo):
         self.separator = separator
 
 class CsvTable(PandasTable):
-    def __init__(self, csv_source_info):
-        self.data_frame = pd.read_csv(csv_source_info.file_path, sep = csv_source_info.separator)
+    def __init__(self, csv_source_info, select_field_list = None):
+        self.data_frame = pd.read_csv(csv_source_info.file_path, sep = csv_source_info.separator, usecols = select_field_list)
         pd_source_info = PandasSourceInfo(self.data_frame)
         PandasTable.__init__(self, pd_source_info)

@@ -28,11 +28,22 @@ class FilterInfo:
         return (self.col_name, operation_str, self.value)
 
 class PandasTable(SQLParserTable):
-    def __init__(self, pandas_source_info):
+    def __init__(self, pandas_source_info, select_field_list = None):
+
+        column_list = pandas_source_info.data_frame.columns.tolist()
+        if select_field_list != None:
+            for select_field in select_field_list:
+                if select_field not in column_list:
+                    raise Exception(select_field + " not exist")
+
         self.pandas_source_info = pandas_source_info
+        if select_field_list != None:
+            self.data_frame = pd.DataFrame(self.pandas_source_info.data_frame, columns = select_field_list)
+        else:
+            self.data_frame = self.pandas_source_info.data_frame
 
     def GetColumnNames(self):
-        return self.pandas_source_info.data_frame.columns.tolist()
+        return self.data_frame.columns.tolist()
 
     def BestIndex(self, constraints, orderbys):
         if len(constraints) == 0:
@@ -59,7 +70,7 @@ class PandasCursor(SQLParserCursor):
     def __init__(self, table):
         self.table = table
         self.sort_data_frame = False
-        self.pd_data_frame = self.table.pandas_source_info.data_frame
+        self.pd_data_frame = self.table.data_frame
         self.filter_data_frame = self.pd_data_frame
 
     def Filter(self, indexnum, filter_json, constraintargs):
@@ -105,6 +116,8 @@ class PandasCursor(SQLParserCursor):
     def Column(self, col):
         if self.filter_data_frame.dtypes[col] == "object" or self.filter_data_frame.dtypes[col] == "datetime64[ns]":
            return str(self.filter_data_frame.values[self.pos][col])
+        elif self.filter_data_frame.dtypes[col] == "int64" or self.filter_data_frame.dtypes[col] == "int32":
+            return int(self.filter_data_frame.values[self.pos][col])
         return self.filter_data_frame.values[self.pos][col]
 
     def Next(self):

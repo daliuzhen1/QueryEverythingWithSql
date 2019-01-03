@@ -55,17 +55,18 @@ class DB2Table(PandasTable):
         for column in columns:
             columns_list.append(column['COLUMN_NAME'])
         
-        self.schema_column_list = []
+        schema_column_list = []
         if self.select_field_list != None:
             for select_field in self.select_field_list:
-                if select_field not in columns_list:
+                if select_field.upper() not in columns_list:
                     raise Exception(select_field + " not exist")
                 else:
-                    self.schema_column_list.append(select_field)
+                    schema_column_list.append(select_field)
+        if len(schema_column_list) == 0:
+            col_str_join = "*"
         else:
-            self.schema_column_list = columns_list
-
-        self.data_frame = pd.read_sql("select * from " +  self.table_name, 
+            col_str_join = ','.join(schema_column_list)
+        self.data_frame = pd.read_sql("select " + col_str_join + " from " +  self.table_name, 
             self.db2_source_info.connection_ibm)
         pd_source_info = PandasSourceInfo(self.data_frame)
         PandasTable.__init__(self, pd_source_info)

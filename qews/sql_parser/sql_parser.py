@@ -1,7 +1,7 @@
 import pandas as pd
 import apsw
 import json
-
+from abc import abstractmethod
 """
 It is a wrapper for apsw
 apsw_connection:It is a apsw connection, all of sql query based on this connection
@@ -28,7 +28,7 @@ class SQLParserModule():
     source_info: Support csv, excel, pandas, db2 source
 
     """
-    def createTable(self, table_name, sql_parser_table):
+    def registeTable(self, table_name, sql_parser_table):
         if table_name in self.table_list:
             raise Exception(table_name + " has already created ")
         self.table_list[table_name] = sql_parser_table
@@ -58,15 +58,19 @@ class SQLParserTable():
     parse source info and set your table
     Return: column list
     """
+    @abstractmethod
     def GetColumnNames(self):
         raise Exception("please implement GetColumnNames in your class")
 
+    @abstractmethod
     def BestIndex(self, constraints, orderbys):
         raise Exception("please implement BestIndex in your class")
 
+    @abstractmethod
     def Open(self):
         raise Exception("please implement Open in your class")
 
+    @abstractmethod
     def Disconnect(self):
         raise Exception("please implement Disconnect in your class")
 
@@ -74,21 +78,26 @@ class SQLParserTable():
 class SQLParserCursor:
     def __init__(self, table):
         pass
-
+    @abstractmethod
     def Filter(self, indexnum, filter_json, constraintargs):
         raise Exception("please implement Filter in your class")
 
+    @abstractmethod
     def Eof(self):
         raise Exception("please implement Eof in your class")
 
+    @abstractmethod
     def Rowid(self):
         raise Exception("please implement Rowid in your class")
 
+    @abstractmethod
     def Column(self, col):
         raise Exception("please implement Column in your class")
 
+    @abstractmethod
     def Next(self):
         raise Exception("please implement Next in your class")
 
+    @abstractmethod
     def Close(self):
         raise Exception("please implement Next in your class")
