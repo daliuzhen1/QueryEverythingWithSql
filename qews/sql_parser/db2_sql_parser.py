@@ -4,7 +4,7 @@ import ibm_db
 import ibm_db_dbi
 from sql_parser.pandas_sql_parser import *
 
-class DB2SourceInfo:
+class DB2SourceInfo(SQLParserSourceInfo):
     def __init__(self, ibm_db_connect, database_name = None, host_name = None, port = None, protocol = None, user_name = None, password = None):
         if ibm_db_connect:
             pass
@@ -41,6 +41,13 @@ class DB2SourceInfo:
     def get_table_list(self):
         return self.table_list
 
+    def get_column_info_list_by_table_name(self,table_name):
+        columns = self.connection_ibm.columns(None, table_name, None)
+        columns_list = []
+        for column in columns:
+            columns_list.append(column['COLUMN_NAME'])
+        return columns_list
+
 class DB2Table(PandasTable):
     def __init__(self, db2_source_info, table_name, select_field_list = None):
         table_name = table_name.upper()
@@ -50,11 +57,7 @@ class DB2Table(PandasTable):
         self.db2_source_info = db2_source_info
         self.select_field_list = select_field_list
 
-        columns = self.db2_source_info.connection_ibm.columns(None, self.table_name, None)
-        columns_list = []
-        for column in columns:
-            columns_list.append(column['COLUMN_NAME'])
-        
+        columns_list = self.db2_source_info.get_column_info_list_by_table_name(table_name)
         schema_column_list = []
         if self.select_field_list != None:
             for select_field in self.select_field_list:

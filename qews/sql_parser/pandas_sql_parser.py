@@ -7,6 +7,12 @@ class PandasSourceInfo(SQLParserSourceInfo):
     def __init__(self, pandas_data_frame):
         self.data_frame = pandas_data_frame
 
+    def get_table_list(self):
+        return None
+
+    def get_column_info_list_by_table_name(self, table_name = None):
+        return self.data_frame.columns.tolist()
+
 class FilterInfo:
     def __init__(self, col_index, operation, value, col_name, col_type):
         self.col_index = col_index
@@ -30,7 +36,7 @@ class FilterInfo:
 class PandasTable(SQLParserTable):
     def __init__(self, pandas_source_info, select_field_list = None):
 
-        column_list = pandas_source_info.data_frame.columns.tolist()
+        column_list = pandas_source_info.get_column_info_list_by_table_name()
         if select_field_list != None:
             for select_field in select_field_list:
                 if select_field not in column_list:

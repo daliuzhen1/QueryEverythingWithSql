@@ -45,59 +45,87 @@ class SQLParserSourceInfo():
     def __init__(self):
         pass
 
+    @abstractmethod
+    def get_table_list(self):
+        pass
+
+    @abstractmethod
+    def get_column_info_list_by_table_name(self, table_name):
+        pass
+
 
 class SQLParserTable():
-    """
-    field_map: It is a map. Default is None.Key represent which column name you will be used in the query. value is map the source field
-               For example, if you a have column named test in your table. and you want query it by test1. you can set 
-               field_map[test1] = test.If you don't set it. It use source field name.
-    """
     def __init__(self, source_info, select_field_list = None):
         pass
-    """
-    parse source info and set your table
-    Return: column list
-    """
+
     @abstractmethod
     def GetColumnNames(self):
-        raise Exception("please implement GetColumnNames in your class")
+        pass
 
     @abstractmethod
     def BestIndex(self, constraints, orderbys):
-        raise Exception("please implement BestIndex in your class")
+        pass
 
     @abstractmethod
     def Open(self):
-        raise Exception("please implement Open in your class")
+        pass
 
     @abstractmethod
     def Disconnect(self):
-        raise Exception("please implement Disconnect in your class")
+        pass
 
+    
+    def Commit(self):
+        pass
+
+    @abstractmethod
+    def Destroy(self):
+        pass
+
+    def FindFunction(self, name, nargs):
+        pass
+
+    def Rename(self, newname):
+        raise Exception("Not support rename")
+
+    def Rollback(self):
+        pass
+
+    def Sync(self):
+        pass
+
+    def UpdateChangeRow(self):
+        raise Exception("Not support updateChangeRow")
+
+    def UpdateDeleteRow(self):
+        raise Exception("Not support updateDeleteRow")        
+
+    def UpdateInsertRow(self):
+        raise Exception("Not support updateInsertRow")       
 
 class SQLParserCursor:
     def __init__(self, table):
         pass
     @abstractmethod
     def Filter(self, indexnum, filter_json, constraintargs):
-        raise Exception("please implement Filter in your class")
+        pass
 
     @abstractmethod
     def Eof(self):
-        raise Exception("please implement Eof in your class")
+        pass
 
     @abstractmethod
     def Rowid(self):
-        raise Exception("please implement Rowid in your class")
+        pass
 
     @abstractmethod
     def Column(self, col):
-        raise Exception("please implement Column in your class")
+        pass
 
     @abstractmethod
     def Next(self):
-        raise Exception("please implement Next in your class")
+        pass
 
     @abstractmethod
     def Close(self):
-        raise Exception("please implement Next in your class")
+        pass
