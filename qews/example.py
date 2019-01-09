@@ -3,6 +3,7 @@ import time
 from qews import *
 from source_info.csv_source_info import *
 from source_info.excel_source_info import *
+from source_info.pandas_source_info import *
 from pandasql import sqldf
 
 
@@ -10,26 +11,47 @@ import pyarrow.parquet as pq
 
 def main():
 
-    # qews = Qews()
-    # time_start1 = time.time()
-    # excel_source_info = ExcelSourceInfo("example_data/Discover_Sales_THINK.xlsx")
-    # # df_excel = pd.read_excel("example_data/Discover_Sales_THINK.xlsx", sheet_name = "Discover_Sales_THINK")
+    qews = Qews()
+    time_start1 = time.time()
 
-    # excel_table = ExcelTable("Discover_Sales_THINK", excel_source_info)
-    # qews.registeTable("df_excel", excel_table)
+    # df_excel = pd.read_excel("example_data/Discover_Sales_THINK.xlsx", sheet_name = "Discover_Sales_THINK")
+    excel_source_info = ExcelSourceInfo("example_data/Discover_Sales_THINK.xlsx")
+    excel_table = ExcelTable("Discover_Sales_THINK", excel_source_info)
+    qews.registeTable("pandas", excel_table)
 
-    # print (qews.execute("select * from df_excel where Region = \'WA\'"))
-    # time_end1 = time.time()
-    # print('totally cost1',time_end1 - time_start1)
-    parquet_file = pq.ParquetFile("example_data/userdata1.parquet")
-    print (parquet_file.schema.names)
+    excel_source_info = ExcelSourceInfo("example_data/Discover_Sales_THINK.xlsx")
+    excel_table = ExcelTable("Discover_Sales_THINK", excel_source_info)
+    qews.registeTable("pandas1", excel_table)
+    # df_excel = pd.read_excel("example_data/Discover_Sales_THINK.xlsx", sheet_name = "Discover_Sales_THINK")
+    # excel_source_info = PandasSourceInfo(df_excel)
+    # excel_table = PandasTable(excel_source_info)
+    # qews.registeTable("pandas1", excel_table)
+    # excel_source_info = CsvSourceInfo("example_data/yahoo_prices.csv")
+    # excel_table = CsvTable("yahoo_prices", excel_source_info)
+    # qews.registeTable("yahoo_prices", excel_table)
+
+    # excel_source_info = CsvSourceInfo("example_data/yahoo_prices1.csv")
+    # excel_table = CsvTable("yahoo_prices1", excel_source_info)
+    # qews.registeTable("yahoo_prices1", excel_table)
+    time_start1 = time.time()
+    print (qews.execute("select * from pandas join pandas1 on pandas.ProfitMargin = pandas1.ProfitMargin"))
+    # qews.execute("select y.AdjClose from (select * from yahoo_prices) y join yahoo_prices1 y1 on y.Volume = y1.Volume")
+    # print (qews.execute("select y.AdjClose from yahoo_prices y join (select Volume from  yahoo_prices1) y1 on y.Volume = y1.Volume"))
+    # print (qews.execute("select * from yahoo_prices1"))
+    time_end1 = time.time()
+    print('totally cost1',time_end1 - time_start1)
+
+
+
+    # parquet_file = pq.ParquetFile("example_data/userdata1.parquet")
+    # print (parquet_file.schema.names)
    
 
 
     # time_start2 = time.time()
     # # df = pd.read_csv("example_data/yahoo_prices.csv")
     # df_excel = pd.read_excel("example_data/Discover_Sales_THINK.xlsx", sheet_name = "Discover_Sales_THINK")
-    # print (sqldf("select * from df_excel"))
+    # print (sqldf("select * from df_excel where Region = \'WA\'"))
     # time_end2 = time.time()
     # print('totally cost1',time_end2 - time_start2)
 

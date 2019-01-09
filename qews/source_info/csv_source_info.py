@@ -23,8 +23,5 @@ class CsvTable(QewsParserTable):
     def get_col_names(self):
         return pd.read_csv(self.source_info.file_path, self.source_info.separator, nrows = 0).columns.tolist()
 
-    def get_table_name(self):
-        return self.table_name
-
     def parse_data_by_col_names(self, col_names):
         return pd.read_csv(self.source_info.file_path, sep = self.source_info.separator, usecols = col_names)

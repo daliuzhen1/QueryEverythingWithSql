@@ -5,10 +5,10 @@ import pandas as pd
 class ExcelSourceInfo(QewsSourceInfo):
     def __init__(self, file_path):
         self.file_path = file_path
-        self.xl = pd.ExcelFile(self.file_path)
 
     def get_table_list(self):
-        return self.xl.sheet_names
+        xl = pd.ExcelFile(self.file_path)
+        return xl.sheet_names
     
 
 class ExcelTable(QewsParserTable):
@@ -21,12 +21,11 @@ class ExcelTable(QewsParserTable):
         QewsParserTable.__init__(self, table_name, source_info)
 
     def get_col_names(self):
-        return self.source_info.xl.parse(sheet_name = self.table_name, nrows = 0).columns.tolist()
-
-    def get_table_name(self):
-        return self.table_name
+        xl = pd.ExcelFile(self.source_info.file_path)
+        return xl.parse(sheet_name = self.table_name, nrows = 0).columns.tolist()
 
     def parse_data_by_col_names(self, col_names):
+        xl = pd.ExcelFile(self.source_info.file_path)
         use_cols_int = []
         column_list = self.get_col_names()
         if col_names != None:
@@ -35,4 +34,4 @@ class ExcelTable(QewsParserTable):
                     raise Exception(select_field + " not exist")
                 else:
                     use_cols_int.append(column_list.index(col_name))
-        return self.source_info.xl.parse(sheet_name = self.table_name, usecols = use_cols_int)
+        return xl.parse(sheet_name = self.table_name, usecols = use_cols_int)

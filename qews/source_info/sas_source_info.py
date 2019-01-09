@@ -20,9 +20,6 @@ class SasTable(QewsParserTable):
     def get_col_names(self):
         return pd.read_sas(self.file_path, chunksize = 0).columns.tolist()
 
-    def get_table_name(self):
-        return self.table_name
-
     def parse_data_by_col_names(self, col_names):
         data_frame = pd.read_sas(self.source_info.file_path)
         return pd.DataFrame(data_frame, columns = col_names)
