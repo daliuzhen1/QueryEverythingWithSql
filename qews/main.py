@@ -17,7 +17,7 @@ def main():
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css',"https://codepen.io/chriddyp/pen/dZMMma.css", "https://rawgit.com/lwileczek/Dash/master/undo_redo5.css"]
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
     main_page(app)
-    app.run_server(debug=True)
+    app.run_server(debug=False)
 
     # qews = Qews()
     # # time_start1 = time.time()

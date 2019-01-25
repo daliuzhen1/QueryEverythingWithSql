@@ -2,6 +2,9 @@ import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
+import os.path 
+import sqlinput
+import json
 import plotly.graph_objs as go
 import pandas as pd
 
@@ -10,9 +13,8 @@ from source_info.excel_source_info import *
 # from source_info.db2_source_info import *
 from source_info.parquet_source_info import *
 from source_info.sas_source_info import *
-# from source_info.sas_source_info import *
 from qews import *
-import os.path 
+
 
 
 class VisSourceInfo:
@@ -21,18 +23,30 @@ class VisSourceInfo:
         self.df_source = pd.DataFrame(data = {'current source': []})
         self.df_table_list = pd.DataFrame(data = {'table list': []})
         self.df_column_list = pd.DataFrame(data = {'column list': []})
+        self.autoCompelete_dict = {} 
+        self.autoCompelete_dict['Dash_Scatter(ContinuesX, ContinuesY)'] = []
+        self.autoCompelete_dict['Dash_Line(ContinuesX, ContinuesY)'] = []
+        self.autoCompelete_dict['Dash_Bar(CategoryX, ContinuesY)'] = []
+        self.json_autoCompelete = json.dumps(self.autoCompelete_dict)
     def add_source(self, source_name, source_info):
         if self.qews.add_source(source_name, source_info):
             self.df_source = self.df_source.append({'current source' : source_name}, ignore_index=True)
+            table_list = source_info.get_table_list()
+            for table in table_list:
+                col_list = source_info.get_col_names_by_table_name(table)
+                table_complete_name = source_name + '_' + table
+                self.autoCompelete_dict[table_complete_name] = col_list
+            self.json_autoCompelete = json.dumps(self.autoCompelete_dict)
             return True
         return False
 
 vis_source_info = VisSourceInfo()
-
 def main_page(app):
     # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css',"https://codepen.io/chriddyp/pen/dZMMma.css", "https://rawgit.com/lwileczek/Dash/master/undo_redo5.css"]
     # app = dash.Dash(__name__, external_stylesheets = external_stylesheets)
     app.config['suppress_callback_exceptions']=True
+    app.scripts.config.serve_locally = True
+    app.css.config.serve_locally = True    
     app.layout = html.Div(children=[
         html.H1(children = 'Hello Supper Select', style = {
             'textAlign': 'center',
@@ -115,12 +129,13 @@ def main_page(app):
         html.Div(id='add_button_callback', style = {'display' : 'none'}),
         html.Br(),
         html.Br(),
-        dcc.Textarea(
-            id='sql_statement_area',
-            placeholder='Enter a select sql...',
-            value='',
-            style={'width': '100%','height': '130px', 'fontSize':30}
-        ),
+        # dcc.Textarea(
+        #     id='sql_statement_area',
+        #     placeholder='Enter a select sql...',
+        #     value='',
+        #     style={'width': '100%','height': '130px', 'fontSize':30}
+        # ),
+        sqlinput.sqlInput(id='sql_statement_area', tableList= vis_source_info.json_autoCompelete),
         html.Br(),
         html.Button('run', id='run_select_button'),
         html.Br(),
@@ -139,6 +154,12 @@ def main_page(app):
                  [dash.dependencies.Input('current_table_list', 'data')])
     def update_table_list(active_cell):
         return  [0, 0]
+
+    @app.callback(dash.dependencies.Output('sql_statement_area', 'tableList'),
+                 [dash.dependencies.Input('current_source_table', 'data')])
+    def update_table_list(active_cell):
+        print (vis_source_info.json_autoCompelete)
+        return  vis_source_info.json_autoCompelete
 
     @app.callback(dash.dependencies.Output('current_col_list', 'data'),
                  [dash.dependencies.Input('current_table_list', 'active_cell')],
@@ -318,7 +339,6 @@ def main_page(app):
     def run_sql(n_clicks, sql):
         if sql == None:
             return
-        print (11111)
         print (sql)
         ret = vis_source_info.qews.execute(sql)
         print ('end')
