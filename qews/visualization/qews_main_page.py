@@ -54,8 +54,8 @@ def main_page(app):
         }),
         html.Div(children=[
         html.Div(children=[
-            dash_table.DataTable(
             html.Br(),
+            dash_table.DataTable(
             id = 'current_source_table',
             style_cell={'width': '150px', 'textAlign': 'center'},
             data=vis_source_info.df_source.to_dict('rows'),
@@ -66,11 +66,11 @@ def main_page(app):
                 'border': 'thin lightgrey solid'
             },
         ),
+        html.Br(),
         dash_table.DataTable(
             # columns=[{'current source': c} for c in df.columns],
             # data=df.to_dict('rows'),
             # style_as_list_view = True,
-            html.Br(),
             id = 'current_table_list',
             style_cell={'width': '150px', 'textAlign': 'center'},
             data=vis_source_info.df_table_list.to_dict('rows'),
@@ -81,11 +81,11 @@ def main_page(app):
                 'border': 'thin lightgrey solid'
             },
         ),
+        html.Br(),
         dash_table.DataTable(
             # columns=[{'current source': c} for c in df.columns],
             # data=df.to_dict('rows'),
             # style_as_list_view = True,
-            html.Br(),
             id = 'current_col_list',
             style_cell={'width': '150px', 'textAlign': 'center'},
             data=vis_source_info.df_column_list.to_dict('rows'),
@@ -338,6 +338,8 @@ def main_page(app):
                  [dash.dependencies.State('sql_statement_area', 'value')])
     def run_sql(n_clicks, sql):
         if sql == None:
+            return
+        if not sql.strip():
             return
         print (sql)
         ret = vis_source_info.qews.execute(sql)
