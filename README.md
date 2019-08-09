@@ -7,4 +7,4 @@ cd qews
   example.py
   
 # example sql
-![]https://github.com/daliuzhen1/QueryEverythingWithSql/blob/master/demo.png
+![image](https://github.com/daliuzhen1/QueryEverythingWithSql/blob/master/demo.png)
