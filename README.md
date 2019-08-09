@@ -5,4 +5,6 @@ Query every thing with sqlite virtual table.Now support csv, excel, parquet, pan
 cd qews  
   pip install -r requirements.txt  
   example.py
-
+  
+# example sql
+![]https://github.com/daliuzhen1/QueryEverythingWithSql/blob/master/demo.png
